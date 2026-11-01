@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # Service 1: Database (PostgreSQL)
+  postgres_db:
+    image: postgres:15-alpine
+    container_name: postgres_commuter
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: commuter_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Service 2: Aplikasi ETL Pipeline
+  etl_runner:
+    build: .
+    container_name: etl_commuter_runner
+    environment:
+      DB_HOST: postgres_db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgrespassword
+      DB_NAME: commuter_db
+      CSV_PATH: data/data_commuter.csv
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
