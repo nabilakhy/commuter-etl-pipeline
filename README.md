@@ -1,6 +1,6 @@
 # 🚆 End-to-End Commuter Life Satisfaction ETL Pipeline
 
-Sebuah proyek pipeline data sederhana yang mengekstrak, membersihkan, mentransformasikan, dan memuat data survei kepuasan hidup komuter perkotaan ke dalam basis data **PostgreSQL** yang terisolasi menggunakan **Docker** dan **Docker Compose**.
+A lightweight, containerized data pipeline that extracts, cleans, transforms, and loads urban commuter life satisfaction survey data into an isolated **PostgreSQL** database using **Docker** and **Docker Compose**.
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue?logo=postgresql)
@@ -11,105 +11,105 @@ Sebuah proyek pipeline data sederhana yang mengekstrak, membersihkan, mentransfo
 
 ## 📌 1. Business Understanding
 
-### Latar Belakang
-Di kawasan metropolitan (seperti Jabodetabek), jutaan pekerja menghabiskan waktu 1 hingga 4 jam setiap hari untuk perjalanan pulang-pergi (*commuting*). Kondisi perjalanan—seperti pemilihan moda transportasi, waktu tempuh, dan tingkat kepadatan—berpengaruh langsung terhadap tingkat stres dan kesejahteraan psikologis (*Subjective Well-Being*).
+### Background
+In major metropolitan regions (such as the Greater Jakarta / Jabodetabek area), millions of workers spend 1 to 4 hours every day commuting. Daily transit factors—including transit mode, travel duration, and congestion—directly correlate with stress levels, productivity, and overall psychological well-being (*Subjective Well-Being*).
 
-### Masalah
-Data survei mentah sering kali menggunakan kode kuesioner numerik (`a1`, `a2`, `b1`), memiliki nilai kosong (*missing values*), serta format tidak terstandarisasi. Hal ini menyulitkan para pengambil keputusan dan analis data untuk langsung menggunakannya.
+### Problem Statement
+Raw survey datasets frequently contain cryptic numerical questionnaire codes (`a1`, `a2`, `b1`), missing values, and unstandardized schemas. Without automated data preparation, this raw data is inaccessible for business analysts, urban planners, and decision-makers.
 
-### Tujuan Proyek
-- Mengotomatisasi alur **Extract, Transform, Load (ETL)** secara terstruktur tanpa alat orkestrasi berat (*lightweight pipeline*).
-- Melakukan *semantic transformation* (mengubah kode angka menjadi label deskriptif yang mudah dipahami).
-- Menyediakan basis data analitik terpusat (*Single Source of Truth*) di PostgreSQL menggunakan container Docker.
+### Project Objectives
+- Automate a clean and reproducible **Extract, Transform, Load (ETL)** pipeline without heavyweight orchestration overhead.
+- Perform *semantic data transformation* (mapping encoded survey values into descriptive, human-readable labels).
+- Deliver an analytics-ready *Single Source of Truth* in a relational PostgreSQL database containerized with Docker.
 
 ---
 
-## 🏗️ 2. Arsitektur Pipeline
+## 🏗️ 2. Pipeline Architecture
 
 ```text
-[ data_commuter.csv ] (Dataset Mentah Kaggle)
+[ data_commuter.csv ] (Raw Kaggle Dataset)
          │
          ▼ (Extract)
     [ Pandas DataFrame ]
          │
          ▼ (Transform)
-    ├── Standarisasi nama kolom ke snake_case
-    ├── Semantic Renaming (a1 -> kode_gender, a2 -> usia, b1 -> kode_transportasi)
-    ├── Mapping kode angka ke label (1 -> 'Laki-laki', 4 -> 'KRL Commuter Line')
-    └── Age Binning (<25, 25-40, 41-60, >60 tahun)
+    ├── Standardize column names to snake_case
+    ├── Semantic Renaming (a1 -> gender_code, a2 -> age, b1 -> transport_code)
+    ├── Value Mapping (1 -> 'Male', 4 -> 'KRL Commuter Line', etc.)
+    └── Age Binning (<25, 25-40, 41-60, >60 years old)
          │
          ▼ (Load via SQLAlchemy)
-[ PostgreSQL Database (Container Docker) ]
+[ PostgreSQL Database (Docker Container) ]
 ```
 
 ---
 
-## 📊 3. Ringkasan Temuan Data (Key Insights)
+## 📊 3. Key Insights from the Data
 
-Berdasarkan 384 responden komuter perkotaan:
-- **Dominasi KRL**: Sebanyak **61.7% komuter (237 responden)** mengandalkan moda transportasi **KRL Commuter Line**, menjadikannya tulang punggung mobilitas harian.
-- **Demografi Responden**: Terdiri dari **74.2% Laki-laki** (285 responden) dan **25.8% Perempuan** (99 responden).
-- **Usia Produktif**: Mayoritas komuter berada pada kelompok usia produktif **25–40 tahun**.
+Based on analysis of 384 commuter survey respondents:
+- **Public Transit Dominance**: Approximately **61.7% of commuters (237 respondents)** rely primarily on the **KRL Commuter Line**, confirming it as the backbone of daily urban transit.
+- **Demographics**: Composed of **74.2% Male** (285 respondents) and **25.8% Female** (99 respondents).
+- **Core Age Group**: The majority of commuters fall within the core productive demographic of **25–40 years old**.
 
 ---
 
-## 📁 4. Struktur Proyek
+## 📁 4. Project Structure
 
 ```text
 commuter-etl/
 ├── data/
-│   └── data_commuter.csv      # File dataset mentah
+│   └── data_commuter.csv      # Raw survey dataset
 ├── src/
-│   └── etl.py                 # Script ETL (Extract, Transform, Load)
-├── Dockerfile                 # Konfigurasi container environment Python
-├── docker-compose.yml         # Orkestrasi PostgreSQL & runner ETL
-├── requirements.txt           # Dependensi pustaka Python
-├── .gitignore                 # Filter file sampah/cache Git
-└── README.md                  # Dokumentasi proyek
+│   └── etl.py                 # Core ETL pipeline script (Extract, Transform, Load)
+├── Dockerfile                 # Docker build specification for Python ETL environment
+├── docker-compose.yml         # Container orchestration for PostgreSQL & ETL runner
+├── requirements.txt           # Python library dependencies
+├── .gitignore                 # Git ignore rules for clean repository state
+└── README.md                  # Project documentation
 ```
 
 ---
 
-## 🚀 5. Cara Menjalankan Proyek
+## 🚀 5. Getting Started
 
-### Prasyarat:
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) sudah terinstal dan dalam kondisi aktif (*running*).
+### Prerequisites:
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running.
 
-### Langkah Menjalankan:
-1. **Clone repositori ini:**
+### How to Run:
+1. **Clone this repository:**
    ```bash
-   git clone https://github.com/USERNAME_ANDA/commuter-etl.git
+   git clone https://github.com/YOUR_USERNAME/commuter-etl.git
    cd commuter-etl
    ```
 
-2. **Jalankan pipeline dan database dengan satu perintah:**
+2. **Build and run the pipeline and database with a single command:**
    ```bash
    docker compose up --build
    ```
 
-3. **Verifikasi data hasil transformasi di PostgreSQL:**
+3. **Verify the transformed data in PostgreSQL:**
    ```bash
    docker exec -it postgres_commuter psql -U postgres -d commuter_db -c "SELECT usia, kelompok_usia, jenis_kelamin, nama_transportasi FROM dim_kepuasan_komuter LIMIT 5;"
    ```
 
-4. **Menghentikan container:**
+4. **Tear down the containers:**
    ```bash
    docker compose down
    ```
 
 ---
 
-## 📤 6. Panduan Publikasi ke GitHub
+## 📤 6. Publishing to GitHub
 
-Untuk mengunggah proyek ini ke akun GitHub pribadi:
+To push this project to your personal GitHub account:
 
-1. Buat repository baru di [GitHub](https://github.com/new) dengan nama `commuter-etl` (tanpa mencentang opsi *Add README*).
-2. Jalankan perintah berikut di terminal:
+1. Create a new repository on [GitHub](https://github.com/new) named `commuter-etl` (leave *Add README* unchecked).
+2. Execute the following commands in your terminal:
    ```bash
    git init
    git add .
    git commit -m "feat: initial commuter etl pipeline with docker and postgres"
    git branch -M main
-   git remote add origin https://github.com/USERNAME_ANDA/commuter-etl.git
+   git remote add origin https://github.com/YOUR_USERNAME/commuter-etl.git
    git push -u origin main
    ```
